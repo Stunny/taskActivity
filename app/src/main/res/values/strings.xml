@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">To-Do List</string>
+    <string name="sort_by_date">Sort by date</string>
+    <string name="sort_by_priority">Sort by priority</string>
+    <string name="pending_tasks">Pending Tasks (%1$d)</string>
+    <string name="undo">UNDO</string>
+</resources>

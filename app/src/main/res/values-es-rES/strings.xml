@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sort_by_date">Ordenar por fecha</string>
+    <string name="sort_by_priority">Ordenar por prioridad</string>
+    <string name="pending_tasks">Tareas Pendientes (%1$d)</string>
+    <string name="undo">UNDO</string>
+</resources>
