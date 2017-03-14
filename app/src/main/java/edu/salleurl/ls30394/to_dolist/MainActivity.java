@@ -26,15 +26,25 @@ import static edu.salleurl.ls30394.to_dolist.R.attr.layoutManager;
 
 public class MainActivity extends AppCompatActivity {
 
+    /**
+     * How many tasks are not yet accomplished, or, in other words, deleted.
+     */
     private int pendingTasks;
 
+    /**
+     * Where all tasks are displayed as a list
+     */
     private RecyclerView recyclerView;
 
+    /**
+     * Custom Recycler View adapter implemented for the display of tasks
+     */
     private TaskAdapter taskAdapter;
 
     @Override
     /**
-     *
+     * Main functionality for the Main activity. All procedures that must be done when the activity
+     * is created are implemented here
      */
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -47,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     *
+     * Assigns every layout widget to its Activity attribute and then configures it.
      */
     private void initWidgets() {
         initRecycler();
@@ -55,7 +65,49 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     *
+     * Initializes and configures the activity's action bar
+     */
+    private void initActionBar() {
+
+        getSupportActionBar().setTitle(
+                String.format(getString(R.string.pending_tasks), pendingTasks)
+        );
+
+    }
+
+    @Override
+    /**
+     * Function that initializes the action bar menu when the activity is created
+     */
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        getMenuInflater().inflate(R.menu.main_activity_menu, menu);
+        return super.onCreateOptionsMenu(menu);
+
+    }
+
+    @Override
+    /**
+     * Controls which of the action bar menu options has been selected, and executes the
+     * corresponding functionality
+     */
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()){
+
+            case R.id.main_menu_sortPriority:
+                OnSortTasksByPriority();
+                return true;
+
+            case R.id.main_menu_sortDate:
+                OnSortTasksByDate();
+                return true;
+        }
+
+        return true;
+    }
+
+    /**
+     * Initializes and configures the recycler view that displays the Task List
      */
     private void initRecycler() {
         recyclerView = (RecyclerView) findViewById(R.id.main_recycler);
@@ -65,6 +117,7 @@ public class MainActivity extends AppCompatActivity {
 
         taskAdapter = new TaskAdapter(this);
         recyclerView.setAdapter(taskAdapter);
+        recyclerView.setNestedScrollingEnabled(false);
 
         hardCodeExamples();
 
@@ -73,6 +126,10 @@ public class MainActivity extends AppCompatActivity {
         initRecyclerScrollListener();
     }
 
+
+    /**
+     * Initializes and configures a listener to the Recycler View's scroll
+     */
     private void initRecyclerScrollListener() {
         if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M ) {
             recyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -98,61 +155,38 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+
+    /**
+     * Initializes some hardcoded task examples to show the current functioning of the activity
+     */
     private void hardCodeExamples() {
 
 
         taskAdapter.addTask(
-                new Task(Task.TASK_PRIORITY_HI, "Ayy lmao", new Date(System.currentTimeMillis())));
+                new Task(Task.TASK_PRIORITY_HI, "Hoigh 1", new Date(System.currentTimeMillis())));
 
         taskAdapter.addTask(
-                new Task(Task.TASK_PRIORITY_NORMAL, "forty keks", new Date(System.currentTimeMillis()))
+                new Task(Task.TASK_PRIORITY_NORMAL, "Normal 1", new Date(System.currentTimeMillis()))
         );
 
         taskAdapter.addTask(
-                new Task(Task.TASK_PRIORITY_LO, "ylyl-ygyl", new Date(System.currentTimeMillis()))
+                new Task(Task.TASK_PRIORITY_LO, "Low1", new Date(System.currentTimeMillis()))
         );
 
-    }
+        taskAdapter.addTask(
+                new Task(Task.TASK_PRIORITY_HI, "High2", new Date(System.currentTimeMillis())));
 
-    /**
-     *
-     */
-    private void initActionBar() {
-
-        getSupportActionBar().setTitle(
-                String.format(getString(R.string.pending_tasks), pendingTasks)
+        taskAdapter.addTask(
+                new Task(Task.TASK_PRIORITY_NORMAL, "Normal 2", new Date(System.currentTimeMillis()-1000))
         );
 
-    }
+        taskAdapter.addTask(
+                new Task(Task.TASK_PRIORITY_LO, "Low2", new Date(System.currentTimeMillis()-5000))
+        );
 
-    @Override
-    /**
-     *
-     */
-    public boolean onCreateOptionsMenu(Menu menu) {
+        taskAdapter.addTask(
+                new Task(Task.TASK_PRIORITY_HI, "High3", new Date(System.currentTimeMillis()-10000)));
 
-        getMenuInflater().inflate(R.menu.main_activity_menu, menu);
-        return super.onCreateOptionsMenu(menu);
-
-    }
-
-    @Override
-    /**
-     *
-     */
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch(item.getItemId()){
-
-            case R.id.main_menu_sortPriority:
-                OnSortTasksByPriority();
-                return true;
-
-            case R.id.main_menu_sortDate:
-                OnSortTasksByDate();
-                return true;
-        }
-
-        return true;
     }
 
 
@@ -175,7 +209,7 @@ public class MainActivity extends AppCompatActivity {
      */
     private void initRecyclerAnimationDecoratorHelper() {
         DividerItemDecoration dividerItemDecoration =
-                new DividerItemDecoration(recyclerView.getContext(),DividerItemDecoration.HORIZONTAL);
+                new DividerItemDecoration(recyclerView.getContext(),DividerItemDecoration.VERTICAL);
         recyclerView.addItemDecoration(dividerItemDecoration);
         recyclerView.addItemDecoration(new RecyclerView.ItemDecoration() {
 
@@ -183,7 +217,7 @@ public class MainActivity extends AppCompatActivity {
             boolean initiated;
 
             private void init() {
-                background = new ColorDrawable(Color.RED);
+                background = new ColorDrawable(Color.LTGRAY);
                 initiated = true;
             }
 
@@ -259,7 +293,7 @@ public class MainActivity extends AppCompatActivity {
                     boolean initiated;
 
                     private void init() {
-                        background = new ColorDrawable(Color.RED);
+                        background = new ColorDrawable(Color.LTGRAY);
                         deleteMark = ContextCompat.getDrawable(MainActivity.this, R.drawable.ic_deleting);
                         deleteMark.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
                         deleteMarkMargin = (int) MainActivity.this.getResources()
@@ -327,5 +361,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    public void setPendingTasks(int pendingTasks){
+        this.pendingTasks = pendingTasks;
 
+        initActionBar();
+    }
 }

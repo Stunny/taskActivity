@@ -12,9 +12,11 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+import edu.salleurl.ls30394.to_dolist.MainActivity;
 import edu.salleurl.ls30394.to_dolist.R;
 import edu.salleurl.ls30394.to_dolist.model.Task;
 
@@ -25,69 +27,72 @@ import edu.salleurl.ls30394.to_dolist.model.Task;
 
 public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder> {
 
-    private static final long PENDING_REMOVAL_TIMEOUT = 10 * 1000;
+    /**
+     * Desired timeout for a task's removal
+     */
+    private static final long PENDING_REMOVAL_TIMEOUT = 5 * 1000;
 
-    private List<Task> taskList;
-
-    private List<Task> tasksPendingRemoval;
-
-    private android.os.Handler handler;
-
-    private HashMap<Task, Runnable> pendingRunnables;
-
+    /**
+     * Activity in which the adapter is used
+     */
     private Context context;
 
-    public TaskAdapter(Context context){
-        this.context = context;
+    /**
+     * Set of tasks displayed on the main activity
+     */
+    private List<Task> taskList;
+
+    /**
+     * Set of tasks that are pending of removal
+     */
+    private List<Task> tasksPendingRemoval;
+
+    /**
+     * System handler for Runnables
+     */
+    private android.os.Handler handler;
+
+    /**
+     * Set of runnables associated to tasks pending removal
+     */
+    private HashMap<Task, Runnable> pendingRunnables;
+
+    private boolean sortedByDate;
+
+    private boolean sortedByPriority;
+
+    /**
+     * Builds a new TaskAdapter
+     */
+    public TaskAdapter(Context c){
+
+        this.context = c;
 
         taskList = new ArrayList<>();
         tasksPendingRemoval = new ArrayList<>();
 
         handler = new android.os.Handler();
         pendingRunnables = new HashMap<>();
+
+        sortedByDate = false;
+        sortedByPriority = false;
     }
 
 
     /**
-     *
-     * @return
+     * @return How many tasks are loaded in execution
      */
     public int getItemCount() {
         return taskList.size();
     }
 
     @Override
-    /**
-     *
-     */
-    public long getItemId(int position) {
-        return position;
-    }
-
-    /**
-     *
-     */
-    public void sortItemsByPriority(){}
-
-    /**
-     *
-     */
-    public void sortItemsByDate(){}
-
-
-    @Override
-    /**
-     *
-     */
     public TaskViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
         return new TaskViewHolder(parent);
     }
 
     @Override
-    /**
-     *
-     */
     public void onBindViewHolder(TaskViewHolder holder, int position) {
         final Task taskItem = taskList.get(position);
 
@@ -112,7 +117,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             holder.textsWrapper.setVisibility(View.GONE);
             holder.taskIcon.setVisibility(View.GONE);
             holder.undoButton.setVisibility(View.VISIBLE);
-            holder.itemView.setBackgroundColor(Color.RED);
+            holder.itemView.setBackgroundColor(Color.LTGRAY);
 
             holder.undoButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -124,6 +129,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                         handler.removeCallbacks(pendingTaskRemoval);
                     }
                     tasksPendingRemoval.remove(taskItem);
+                    notifyChanges();
                     notifyItemChanged(taskList.indexOf(taskItem));
                 }
             });
@@ -134,30 +140,74 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             holder.undoButton.setVisibility(View.GONE);
             holder.itemView.setBackgroundColor(Color.WHITE);
         }
+
     }
 
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
 
     /**
-     *
-     * @param position
-     * @return
+     * Sorts the set of tasks by priority. First time used low priority tasks will show up first,
+     * next time is used, high priority tasks will.
+     */
+    public void sortItemsByPriority(){
+
+        if(sortedByPriority){
+            Collections.sort(taskList,
+                    Collections.reverseOrder(Task.getPriorityComparator()));
+        }else{
+            Collections.sort(taskList, Task.getDateComparator());
+        }
+
+        sortedByPriority = true;
+        notifyChanges();
+
+    }
+
+    /**
+     * Sorts the set of tasks by date. First time used, older tasks will show up first, next time is
+     * used, newer tasks will.
+     */
+    public void sortItemsByDate(){
+
+        if(sortedByDate){
+            Collections.sort(taskList,
+                    Collections.reverseOrder(Task.getDateComparator()));
+        }else{
+            Collections.sort(taskList, Task.getDateComparator());
+        }
+
+        sortedByDate = true;
+        notifyChanges();
+    }
+
+    /**
+     * @param position Position of the desired task
+     * @return The tasks in the specified position of the list
      */
     public Object getItem(int position) {
         return taskList.get(position);
     }
 
     /**
-     *
-     * @param task
+     * Adds a new task to the displayed set
+     * @param task New task to be added
      */
     public void addTask(Task task){
         taskList.add(task);
         notifyItemInserted(taskList.size()-1);
+
+        sortedByDate = false;
+        sortedByPriority = false;
+
+        notifyChanges();
     }
 
     /**
-     *
-     * @param position
+     * Sets a Task as  one pending removal
+     * @param position The position of the task wanted to be removed
      */
     public void setPendingRemoval(int position){
         final Task taskItem = taskList.get(position);
@@ -176,10 +226,12 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             handler.postDelayed(pendingTaskRemoval, PENDING_REMOVAL_TIMEOUT);
             pendingRunnables.put(taskItem, pendingTaskRemoval);
         }
+
+        notifyChanges();
     }
 
     /**
-     *
+     * Removes a task from all the sets of tasks
      * @param position
      */
     public void removeItem(int position){
@@ -192,19 +244,21 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             taskList.remove(position);
             notifyItemRemoved(position);
         }
+
+        sortedByDate = false;
+        sortedByPriority = false;
     }
 
     /**
-     *
-     * @param position
-     * @return
+     * @param position Position of the desired task to check
+     * @return True if the task in the specified position is pending removal
      */
     public boolean isPendingRemoval(int position){
         return tasksPendingRemoval.contains(taskList.get(position));
     }
 
     /**
-     *
+     * Auxiliar class that defines a TAsk ViewHolder for the RecyclerView
      */
     static class TaskViewHolder extends RecyclerView.ViewHolder{
 
@@ -225,5 +279,13 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             textsWrapper = (LinearLayout) itemView.findViewById(R.id.task_texts);
             undoButton = (Button)itemView.findViewById(R.id.task_undoDelete_btn);
         }
+    }
+
+    private void notifyChanges(){
+
+        ((MainActivity)context).setPendingTasks(taskList.size()-tasksPendingRemoval.size());
+
+        super.notifyDataSetChanged();
+
     }
 }

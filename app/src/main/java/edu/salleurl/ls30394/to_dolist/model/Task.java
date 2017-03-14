@@ -1,6 +1,10 @@
 package edu.salleurl.ls30394.to_dolist.model;
 
+import android.annotation.TargetApi;
+import android.os.Build;
+
 import java.sql.Date;
+import java.util.Comparator;
 
 /**
  * Created by avoge on 07/03/2017.
@@ -81,5 +85,39 @@ public class Task {
      */
     public void setDateOfCreation(Date dateOfCreation) {
         this.dateOfCreation = dateOfCreation;
+    }
+
+
+    /**
+     * @return * @return A new comparator that sorts a list of Tasks by their date of creation
+     */
+    public static Comparator<Task> getDateComparator(){
+
+        return new Comparator<Task>() {
+            @Override
+            public int compare(Task o1, Task o2) {
+                long date1 = o1.getDateOfCreation().getTime();
+                long date2 = o2.getDateOfCreation().getTime();
+
+                return (int) ((int) date1 - date2);
+
+            }
+        };
+
+    }
+
+    /**
+     * @return A new comparator that sorts a list of Tasks by their priority
+     */
+    public static Comparator<Task> getPriorityComparator(){
+        return new Comparator<Task>() {
+            @Override
+            public int compare(Task o1, Task o2) {
+                int priority1 = o1.getPriority();
+                int priority2 = o2.getPriority();
+
+                return priority1-priority2;
+            }
+        };
     }
 }
