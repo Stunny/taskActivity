@@ -18,6 +18,8 @@ public class Task {
 
     public static final int TASK_PRIORITY_HI = 2;
 
+    public static final int TASK_PRIORITY_ASAP = 3;
+
     private int priority;
 
     private String description;
@@ -99,7 +101,7 @@ public class Task {
                 long date1 = o1.getDateOfCreation().getTime();
                 long date2 = o2.getDateOfCreation().getTime();
 
-                return (int) ((int) date1 - date2);
+                return (int) ((int) date2 - date1);
 
             }
         };
@@ -116,7 +118,7 @@ public class Task {
                 int priority1 = o1.getPriority();
                 int priority2 = o2.getPriority();
 
-                return priority1-priority2;
+                return priority2-priority1;
             }
         };
     }

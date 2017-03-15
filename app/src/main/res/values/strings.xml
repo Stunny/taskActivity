@@ -4,4 +4,15 @@
     <string name="sort_by_priority">Sort by priority</string>
     <string name="pending_tasks">Pending Tasks (%1$d)</string>
     <string name="undo">UNDO</string>
+    <string name="add_new_task">Add new Task</string>
+    <string name="priority">Priority</string>
+    <string name="hint">Hint</string>
+    <string name="add">ADD</string>
+
+    <string-array name="priority_categories">
+        <item>ASAP</item>
+        <item>High</item>
+        <item>Normal</item>
+        <item>Low</item>
+    </string-array>
 </resources>

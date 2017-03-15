@@ -101,6 +101,9 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
 
         switch(taskItem.getPriority()){
+            case Task.TASK_PRIORITY_ASAP:
+                holder.taskIcon.setImageResource(R.drawable.ic_task_asap_priority);
+                break;
             case Task.TASK_PRIORITY_HI:
                 holder.taskIcon.setImageResource(R.drawable.ic_task_high_priority);
                 break;
@@ -154,14 +157,13 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
      */
     public void sortItemsByPriority(){
 
-        if(sortedByPriority){
-            Collections.sort(taskList,
-                    Collections.reverseOrder(Task.getPriorityComparator()));
+        if(!sortedByPriority){
+            Collections.sort(taskList, Task.getPriorityComparator());
+            sortedByPriority = true;
+            sortedByDate = false;
         }else{
-            Collections.sort(taskList, Task.getDateComparator());
+            Collections.reverse(taskList);
         }
-
-        sortedByPriority = true;
         notifyChanges();
 
     }
@@ -172,14 +174,14 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
      */
     public void sortItemsByDate(){
 
-        if(sortedByDate){
-            Collections.sort(taskList,
-                    Collections.reverseOrder(Task.getDateComparator()));
-        }else{
+        if(!sortedByDate){
             Collections.sort(taskList, Task.getDateComparator());
+            sortedByDate = true;
+            sortedByPriority = false;
+        }else{
+            Collections.reverse(taskList);
         }
 
-        sortedByDate = true;
         notifyChanges();
     }
 

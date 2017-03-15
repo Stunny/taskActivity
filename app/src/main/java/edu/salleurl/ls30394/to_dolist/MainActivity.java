@@ -6,16 +6,23 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.TextInputEditText;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.Spinner;
 
 import java.sql.Date;
 
@@ -41,6 +48,12 @@ public class MainActivity extends AppCompatActivity {
      */
     private TaskAdapter taskAdapter;
 
+    private Spinner addTaskPrioritySpn;
+
+    private TextInputEditText addTaskHintInput;
+
+    private LinearLayout addTaskView;
+
     @Override
     /**
      * Main functionality for the Main activity. All procedures that must be done when the activity
@@ -62,6 +75,7 @@ public class MainActivity extends AppCompatActivity {
     private void initWidgets() {
         initRecycler();
         initActionBar();
+        initAddTaskPanel();
     }
 
     /**
@@ -69,10 +83,17 @@ public class MainActivity extends AppCompatActivity {
      */
     private void initActionBar() {
 
-        getSupportActionBar().setTitle(
-                String.format(getString(R.string.pending_tasks), pendingTasks)
-        );
+        Toolbar actionBar = (Toolbar)findViewById(R.id.toolbar);
+        actionBar.setTitle(String.format(getString(R.string.pending_tasks), pendingTasks));
+    }
 
+    /**
+     * initializes and configures the "Add new task" drawer
+     */
+    private void initAddTaskPanel(){
+        addTaskView = (LinearLayout)findViewById(R.id.addTaskPanel);
+        addTaskPrioritySpn = (Spinner)findViewById(R.id.prioritySpinner);
+        addTaskHintInput = (TextInputEditText)findViewById(R.id.taskHintInput);
     }
 
     @Override
@@ -123,36 +144,6 @@ public class MainActivity extends AppCompatActivity {
 
         initRecyclerTouchHelper();
         initRecyclerAnimationDecoratorHelper();
-        initRecyclerScrollListener();
-    }
-
-
-    /**
-     * Initializes and configures a listener to the Recycler View's scroll
-     */
-    private void initRecyclerScrollListener() {
-        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M ) {
-            recyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
-                @Override
-                public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                    super.onScrollStateChanged(recyclerView, newState);
-                }
-
-                @Override
-                public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                    super.onScrolled(recyclerView, dx, dy);
-                }
-            });
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            recyclerView.setOnScrollChangeListener(new View.OnScrollChangeListener() {
-                @Override
-                public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
-
-                }
-            });
-        }
-
     }
 
 
@@ -191,26 +182,27 @@ public class MainActivity extends AppCompatActivity {
 
 
     /**
-     *
+     * Tells the task adapter to sort the task list by their addition date
      */
     private void OnSortTasksByDate() {
         taskAdapter.sortItemsByDate();
     }
 
     /**
-     *
+     * Tells the task adapter to sort the task list by their priority
      */
     private void OnSortTasksByPriority() {
         taskAdapter.sortItemsByPriority();
     }
 
     /**
-     *
+     * Initializes Recycler view animations
      */
     private void initRecyclerAnimationDecoratorHelper() {
         DividerItemDecoration dividerItemDecoration =
                 new DividerItemDecoration(recyclerView.getContext(),DividerItemDecoration.VERTICAL);
         recyclerView.addItemDecoration(dividerItemDecoration);
+
         recyclerView.addItemDecoration(new RecyclerView.ItemDecoration() {
 
             Drawable background;
@@ -280,7 +272,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     *
+     * Initializes the Recycler view touch helper
      */
     private void initRecyclerTouchHelper() {
 
@@ -361,6 +353,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    /**
+     * Sets the number of pending pending tasks are saved.
+     * @param pendingTasks Number of pending tasks to display
+     */
     public void setPendingTasks(int pendingTasks){
         this.pendingTasks = pendingTasks;
 

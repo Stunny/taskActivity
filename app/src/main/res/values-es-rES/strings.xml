@@ -4,4 +4,7 @@
     <string name="sort_by_priority">Ordenar por prioridad</string>
     <string name="pending_tasks">Tareas Pendientes (%1$d)</string>
     <string name="undo">UNDO</string>
+    <string name="add_new_task">Add new Task</string>
+    <string name="priority">Priority</string>
+    <string name="add">ADD</string>
 </resources>
