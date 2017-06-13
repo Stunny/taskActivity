@@ -8,6 +8,7 @@
     <string name="priority">Priority</string>
     <string name="hint">Hint</string>
     <string name="add">ADD</string>
+    <string name="swipe">Swipe to delete</string>
 
     <string-array name="priority_categories">
         <item>ASAP</item>

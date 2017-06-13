@@ -7,9 +7,13 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
@@ -25,6 +29,7 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 
 import java.sql.Date;
+import java.util.Calendar;
 
 import edu.salleurl.ls30394.to_dolist.adapters.TaskAdapter;
 import edu.salleurl.ls30394.to_dolist.model.Task;
@@ -48,12 +53,17 @@ public class MainActivity extends AppCompatActivity {
      */
     private TaskAdapter taskAdapter;
 
+
     private Spinner addTaskPrioritySpn;
 
     private TextInputEditText addTaskHintInput;
 
     private LinearLayout addTaskView;
 
+    private FloatingActionButton fab;
+
+    //--------------------------------------------------------------------------------------------//
+    //---------------------------------OVERRIDE METHODS-------------------------------------------//
     @Override
     /**
      * Main functionality for the Main activity. All procedures that must be done when the activity
@@ -67,33 +77,7 @@ public class MainActivity extends AppCompatActivity {
         initWidgets();
 
         pendingTasks = taskAdapter.getItemCount();
-    }
-
-    /**
-     * Assigns every layout widget to its Activity attribute and then configures it.
-     */
-    private void initWidgets() {
-        initRecycler();
-        initActionBar();
-        initAddTaskPanel();
-    }
-
-    /**
-     * Initializes and configures the activity's action bar
-     */
-    private void initActionBar() {
-
-        Toolbar actionBar = (Toolbar)findViewById(R.id.toolbar);
-        actionBar.setTitle(String.format(getString(R.string.pending_tasks), pendingTasks));
-    }
-
-    /**
-     * initializes and configures the "Add new task" drawer
-     */
-    private void initAddTaskPanel(){
-        addTaskView = (LinearLayout)findViewById(R.id.addTaskPanel);
-        addTaskPrioritySpn = (Spinner)findViewById(R.id.prioritySpinner);
-        addTaskHintInput = (TextInputEditText)findViewById(R.id.taskHintInput);
+        Snackbar.make(findViewById(R.id.activity_main), R.string.swipe, Snackbar.LENGTH_SHORT).show();
     }
 
     @Override
@@ -127,6 +111,44 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    //--------------------------------------------------------------------------------------------//
+    //-----------------------METODOS DE INIICIALIZACION GRAFICA Y LOGICA--------------------------//
+
+    /**
+     * Assigns every layout widget to its Activity attribute and then configures it.
+     */
+    private void initWidgets() {
+        initRecycler();
+        initActionBar();
+        initAddTaskPanel();
+
+        fab = (FloatingActionButton)findViewById(R.id.fab);
+    }
+
+    /**
+     * Initializes and configures the activity's action bar
+     */
+    private void initActionBar() {
+
+        Toolbar actionBar;
+
+        if(getSupportActionBar() == null) {
+            actionBar = (Toolbar) findViewById(R.id.toolbar);
+            setSupportActionBar(actionBar);
+        }
+        getSupportActionBar().setTitle(String.format(getString(R.string.pending_tasks), pendingTasks));
+    }
+
+    /**
+     * initializes and configures the "Add new task" drawer
+     */
+    private void initAddTaskPanel(){
+        addTaskView = (LinearLayout)findViewById(R.id.addTaskPanel);
+        addTaskView.setVisibility(View.GONE);
+        addTaskPrioritySpn = (Spinner)findViewById(R.id.prioritySpinner);
+        addTaskHintInput = (TextInputEditText)findViewById(R.id.taskHintInput);
+    }
+
     /**
      * Initializes and configures the recycler view that displays the Task List
      */
@@ -136,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setHasFixedSize(true);
 
-        taskAdapter = new TaskAdapter(this);
+        taskAdapter = new TaskAdapter(this, recyclerView);
         recyclerView.setAdapter(taskAdapter);
         recyclerView.setNestedScrollingEnabled(false);
 
@@ -146,55 +168,7 @@ public class MainActivity extends AppCompatActivity {
         initRecyclerAnimationDecoratorHelper();
     }
 
-
-    /**
-     * Initializes some hardcoded task examples to show the current functioning of the activity
-     */
-    private void hardCodeExamples() {
-
-
-        taskAdapter.addTask(
-                new Task(Task.TASK_PRIORITY_HI, "Hoigh 1", new Date(System.currentTimeMillis())));
-
-        taskAdapter.addTask(
-                new Task(Task.TASK_PRIORITY_NORMAL, "Normal 1", new Date(System.currentTimeMillis()))
-        );
-
-        taskAdapter.addTask(
-                new Task(Task.TASK_PRIORITY_LO, "Low1", new Date(System.currentTimeMillis()))
-        );
-
-        taskAdapter.addTask(
-                new Task(Task.TASK_PRIORITY_HI, "High2", new Date(System.currentTimeMillis())));
-
-        taskAdapter.addTask(
-                new Task(Task.TASK_PRIORITY_NORMAL, "Normal 2", new Date(System.currentTimeMillis()-1000))
-        );
-
-        taskAdapter.addTask(
-                new Task(Task.TASK_PRIORITY_LO, "Low2", new Date(System.currentTimeMillis()-5000))
-        );
-
-        taskAdapter.addTask(
-                new Task(Task.TASK_PRIORITY_HI, "High3", new Date(System.currentTimeMillis()-10000)));
-
-    }
-
-
-    /**
-     * Tells the task adapter to sort the task list by their addition date
-     */
-    private void OnSortTasksByDate() {
-        taskAdapter.sortItemsByDate();
-    }
-
-    /**
-     * Tells the task adapter to sort the task list by their priority
-     */
-    private void OnSortTasksByPriority() {
-        taskAdapter.sortItemsByPriority();
-    }
-
+    //-------------------------INICIALIZACION GRAFICA DE LA RECYCLER VIEW-------------------------//
     /**
      * Initializes Recycler view animations
      */
@@ -346,12 +320,62 @@ public class MainActivity extends AppCompatActivity {
                     }
 
 
-        };
+                };
 
         ItemTouchHelper ith = new ItemTouchHelper(itemTouchCallback);
         ith.attachToRecyclerView(recyclerView);
     }
+    //--------------------------------------------------------------------------------------------//
 
+    /**
+     * Initializes some hardcoded task examples to show the current functioning of the activity
+     */
+    private void hardCodeExamples() {
+
+
+        taskAdapter.addTask(
+                new Task(Task.TASK_PRIORITY_HI, "Hoigh 1", new Date(System.currentTimeMillis())));
+
+        taskAdapter.addTask(
+                new Task(Task.TASK_PRIORITY_NORMAL, "Normal 1", new Date(System.currentTimeMillis()))
+        );
+
+        taskAdapter.addTask(
+                new Task(Task.TASK_PRIORITY_LO, "Low1", new Date(System.currentTimeMillis()))
+        );
+
+        taskAdapter.addTask(
+                new Task(Task.TASK_PRIORITY_HI, "High2", new Date(System.currentTimeMillis())));
+
+        taskAdapter.addTask(
+                new Task(Task.TASK_PRIORITY_NORMAL, "Normal 2", new Date(System.currentTimeMillis()-1000))
+        );
+
+        taskAdapter.addTask(
+                new Task(Task.TASK_PRIORITY_LO, "Low2", new Date(System.currentTimeMillis()-5000))
+        );
+
+        taskAdapter.addTask(
+                new Task(Task.TASK_PRIORITY_HI, "High3", new Date(System.currentTimeMillis()-10000)));
+
+    }
+
+    //--------------------------------------------------------------------------------------------//
+    //------------------------------LOGICA PRINCIPAL DE LA ACTIVIDAD------------------------------//
+
+    /**
+     * Tells the task adapter to sort the task list by their addition date
+     */
+    private void OnSortTasksByDate() {
+        taskAdapter.sortItemsByDate();
+    }
+
+    /**
+     * Tells the task adapter to sort the task list by their priority
+     */
+    private void OnSortTasksByPriority() {
+        taskAdapter.sortItemsByPriority();
+    }
 
     /**
      * Sets the number of pending pending tasks are saved.
@@ -362,4 +386,51 @@ public class MainActivity extends AppCompatActivity {
 
         initActionBar();
     }
+
+    /**
+     * Añade la nueva tarea al adaptador y esconde el panel, mostrando el FAB
+     * @param view Boton de añadir tarea a la lista
+     */
+    public void onAddTask(View view) {
+        Task t = new Task();
+
+        switch((String)addTaskPrioritySpn.getSelectedItem()){
+            case "ASAP":
+                t.setPriority(Task.TASK_PRIORITY_ASAP);
+                break;
+            case "HIGH":
+                t.setPriority(Task.TASK_PRIORITY_HI);
+                break;
+            case "NORMAL":
+                t.setPriority(Task.TASK_PRIORITY_NORMAL);
+                break;
+            case "LOW":
+                t.setPriority(Task.TASK_PRIORITY_LO);
+        }
+
+        t.setDescription(addTaskHintInput.getText().toString());
+        addTaskHintInput.setText("");
+        t.setDateOfCreation(new Date(System.currentTimeMillis()));
+
+        taskAdapter.addTask(t);
+        taskAdapter.notifyChanges();
+        recyclerView.requestLayout();
+
+        addTaskView.setVisibility(View.GONE);
+        fab.setVisibility(View.VISIBLE);
+    }
+
+    /**
+     * Abre el panel de añadir tareas a la lista y esconde el fab
+     * @param view FAB
+     */
+    public void onFABclick(View view) {
+
+        addTaskView.setVisibility(View.VISIBLE);
+        fab.setVisibility(View.GONE);
+
+    }
 }
+
+//------------------------------------------------------------------------------------------------//
+//------------------------------------------------------------------------------------------------//

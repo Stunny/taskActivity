@@ -38,6 +38,11 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     private Context context;
 
     /**
+     * RecyclerView in which this adapter is used
+     */
+    private RecyclerView r;
+
+    /**
      * Set of tasks displayed on the main activity
      */
     private List<Task> taskList;
@@ -61,12 +66,15 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
     private boolean sortedByPriority;
 
+
+
     /**
      * Builds a new TaskAdapter
      */
-    public TaskAdapter(Context c){
+    public TaskAdapter(Context c, RecyclerView r){
 
         this.context = c;
+        this.r = r;
 
         taskList = new ArrayList<>();
         tasksPendingRemoval = new ArrayList<>();
@@ -79,11 +87,38 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     }
 
 
+    //--------------------------------------------------------------------------------------------//
+    //---------------------------------OVERRIDE METHODS-------------------------------------------//
+
     /**
      * @return How many tasks are loaded in execution
      */
     public int getItemCount() {
         return taskList.size();
+    }
+
+    /**
+     * Auxiliar class that defines a TAsk ViewHolder for the RecyclerView
+     */
+    static class TaskViewHolder extends RecyclerView.ViewHolder{
+
+        protected ImageView taskIcon;
+        protected TextView taskdescription;
+        protected TextView taskDate;
+
+        protected Button undoButton;
+
+        protected LinearLayout textsWrapper;
+
+        public TaskViewHolder(ViewGroup parent) {
+            super(LayoutInflater.from(parent.getContext()).inflate(R.layout.task_item, parent, false));
+
+            taskIcon = (ImageView) itemView.findViewById(R.id.task_icon);
+            taskdescription = (TextView)itemView.findViewById(R.id.task_description);
+            taskDate = (TextView)itemView.findViewById(R.id.task_date);
+            textsWrapper = (LinearLayout) itemView.findViewById(R.id.task_texts);
+            undoButton = (Button)itemView.findViewById(R.id.task_undoDelete_btn);
+        }
     }
 
     @Override
@@ -150,6 +185,9 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     public long getItemId(int position) {
         return position;
     }
+
+    //--------------------------------------------------------------------------------------------//
+    //------------------------------LOGICA PRINCIPAL DEL ADAPTADOR--------------------------------//
 
     /**
      * Sorts the set of tasks by priority. First time used low priority tasks will show up first,
@@ -249,6 +287,9 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
         sortedByDate = false;
         sortedByPriority = false;
+
+        r.requestLayout();
+
     }
 
     /**
@@ -259,35 +300,13 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         return tasksPendingRemoval.contains(taskList.get(position));
     }
 
-    /**
-     * Auxiliar class that defines a TAsk ViewHolder for the RecyclerView
-     */
-    static class TaskViewHolder extends RecyclerView.ViewHolder{
-
-        protected ImageView taskIcon;
-        protected TextView taskdescription;
-        protected TextView taskDate;
-
-        protected Button undoButton;
-
-        protected LinearLayout textsWrapper;
-
-        public TaskViewHolder(ViewGroup parent) {
-            super(LayoutInflater.from(parent.getContext()).inflate(R.layout.task_item, parent, false));
-
-            taskIcon = (ImageView) itemView.findViewById(R.id.task_icon);
-            taskdescription = (TextView)itemView.findViewById(R.id.task_description);
-            taskDate = (TextView)itemView.findViewById(R.id.task_date);
-            textsWrapper = (LinearLayout) itemView.findViewById(R.id.task_texts);
-            undoButton = (Button)itemView.findViewById(R.id.task_undoDelete_btn);
-        }
-    }
-
-    private void notifyChanges(){
+    public void notifyChanges(){
 
         ((MainActivity)context).setPendingTasks(taskList.size()-tasksPendingRemoval.size());
 
         super.notifyDataSetChanged();
+
+
 
     }
 }

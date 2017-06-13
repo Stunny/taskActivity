@@ -3,8 +3,16 @@
     <string name="sort_by_date">Ordenar por fecha</string>
     <string name="sort_by_priority">Ordenar por prioridad</string>
     <string name="pending_tasks">Tareas Pendientes (%1$d)</string>
-    <string name="undo">UNDO</string>
-    <string name="add_new_task">Add new Task</string>
-    <string name="priority">Priority</string>
-    <string name="add">ADD</string>
+    <string name="undo">DESHACER</string>
+    <string name="add_new_task">Nueva tarea</string>
+    <string name="priority">Prioridad</string>
+    <string name="add">Añadir</string>
+    <string name="swipe">Arrastre a la derecha para eliminar un elemento</string>
+
+    <string-array name="priority_categories">
+        <item>Urgente</item>
+        <item>Alta</item>
+        <item>Normal</item>
+        <item>Baja</item>
+    </string-array>
 </resources>
